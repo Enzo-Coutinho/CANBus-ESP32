@@ -1,0 +1,2 @@
+source C:/GIthub/CANBus-ESP32/CANBus-ESP32/build/bootloader/gdbinit/symbols
+source C:/GIthub/CANBus-ESP32/CANBus-ESP32/build/bootloader/gdbinit/connect

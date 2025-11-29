@@ -1,0 +1,6 @@
+source "C:/Users/enzoc/esp/v5.5.1/esp-idf/components/bootloader/Kconfig.projbuild"
+source "C:/Users/enzoc/esp/v5.5.1/esp-idf/components/esp_app_format/Kconfig.projbuild"
+source "C:/Users/enzoc/esp/v5.5.1/esp-idf/components/esp_rom/Kconfig.projbuild"
+source "C:/Users/enzoc/esp/v5.5.1/esp-idf/components/esptool_py/Kconfig.projbuild"
+source "C:/Users/enzoc/esp/v5.5.1/esp-idf/components/partition_table/Kconfig.projbuild"
+source "C:/GIthub/CANBus-ESP32/CANBus-ESP32/main/Kconfig.projbuild"
