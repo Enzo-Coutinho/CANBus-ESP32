@@ -14,7 +14,7 @@ QueueHandle_t queue_handler;
 
 static bool twai_rx_cb(twai_node_handle_t handle, const twai_rx_done_event_data_t *edata, void *user_ctx);
 
-void start_can_bus(const gpio_num_t tx, const gpio_num_t rx, const uint32_t bitrate) {
+void start_can_bus(const gpio_num_t tx, const gpio_num_t rx) {
 
     const uint8_t queue_len = 10;
 
@@ -27,6 +27,8 @@ void start_can_bus(const gpio_num_t tx, const gpio_num_t rx, const uint32_t bitr
     ESP_ERROR_CHECK(twai_node_register_event_callbacks(node_hdl, &user_cbs, NULL));
     
     
+    const uint32_t bitrate - 1e6;
+
     node_config.io_cfg.tx = tx;
     node_config.io_cfg.rx = rx;
     node_config.bit_timing.bitrate = bitrate;
@@ -39,7 +41,8 @@ void start_can_bus(const gpio_num_t tx, const gpio_num_t rx, const uint32_t bitr
     ESP_ERROR_CHECK(twai_node_enable(node_hdl));
 }
 
-void send_message(const uint32_t id, const uint8_t data[8]) {
+void send_message(void) {
+    uint8_t data[8];
     twai_frame_t tx_msg = {
         .header.id = 0x1,           // Message ID
         .header.ide = true,         // Use 29-bit extended ID format
@@ -68,7 +71,7 @@ static bool twai_rx_cb(twai_node_handle_t handle, const twai_rx_done_event_data_
         for(int i=0; i<sizeof(recv_buff)/sizeof(uint8_t); i++) {
             data_response |= recv_buff[i] << (i * 8);
         }
-         xQueueSendFromISR(queue_handler, data_response, pdFALSE);
+         xQueueSendFromISR(queue_handler, (void *)&data_response, pdFALSE);
     }
     return false;
 }

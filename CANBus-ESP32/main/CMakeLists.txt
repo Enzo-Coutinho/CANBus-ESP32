@@ -1,3 +1,3 @@
-idf_component_register(SRCS "twai_network_example_slave_main.c"
-                    REQUIRES esp_driver_twai
+idf_component_register(SRCS "main.c" "can-frc/can-frc.c"
+                    REQUIRES esp_driver_twai driver
                     INCLUDE_DIRS ".")
