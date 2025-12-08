@@ -1,8 +1,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "esp_log.h"
 #include "freertos/queue.h"
 #include "esp_err.h"
-#include "esp_log.h"
 #include "esp_twai.h"
 #include "esp_twai_onchip.h"
 #include "can-frc.h"
@@ -13,6 +13,12 @@ twai_onchip_node_config_t node_config;
 QueueHandle_t queue_handler;
 
 static bool twai_rx_cb(twai_node_handle_t handle, const twai_rx_done_event_data_t *edata, void *user_ctx);
+
+enum CAN_MODES mode_to_switch = DEFAULT;
+
+void set_can_mode(enum CAN_MODES mode) {
+    mode_to_switch = mode;
+}
 
 void start_can_bus(const gpio_num_t tx, const gpio_num_t rx) {
 
@@ -27,12 +33,31 @@ void start_can_bus(const gpio_num_t tx, const gpio_num_t rx) {
     ESP_ERROR_CHECK(twai_node_register_event_callbacks(node_hdl, &user_cbs, NULL));
     
     
-    const uint32_t bitrate - 1e6;
+    const uint32_t bitrate = 1e6;
 
     node_config.io_cfg.tx = tx;
     node_config.io_cfg.rx = rx;
     node_config.bit_timing.bitrate = bitrate;
     node_config.tx_queue_depth = 5;
+
+    switch(mode_to_switch)
+    {
+        case LISTEN_ONLY:
+            node_config.flags.enable_listen_only = 1;
+            break;
+        case SELF_TEST:
+            node_config.flags.enable_self_test = 1;
+            break;
+        case NO_RECEITE_RTR:
+            node_config.flags.no_receive_rtr = 1;
+            break;
+        case LOOPBACK:
+            node_config.flags.enable_loopback = 1;
+            break;
+        case DEFAULT:
+        default:
+            break;
+    }
 
     // Create a new TWAI controller driver instance
     ESP_ERROR_CHECK(twai_new_node_onchip(&node_config, &node_hdl));
