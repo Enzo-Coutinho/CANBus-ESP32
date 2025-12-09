@@ -1,7 +1,7 @@
 {
     "version":            "1.2",
     "project_name":       "CANBus-ESP32",
-    "project_version":    "ac00b5d-dirty",
+    "project_version":    "6b1c5fb-dirty",
     "project_path":       "C:/GIthub/CANBus-ESP32/CANBus-ESP32",
     "idf_path":           "C:/Users/enzoc/esp/v5.5.1/esp-idf",
     "build_dir":          "C:/GIthub/CANBus-ESP32/CANBus-ESP32/build",
