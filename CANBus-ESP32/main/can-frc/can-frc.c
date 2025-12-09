@@ -24,7 +24,7 @@ void start_can_bus(const gpio_num_t tx, const gpio_num_t rx) {
 
     const uint8_t queue_len = 10;
 
-    queue_handler = xQueueGenericCreate(queue_len, sizeof(uint64_t), queueQUEUE_TYPE_SET);
+    queue_handler = xQueueGenericCreate(queue_len, sizeof(can_message_t));
 
     twai_event_callbacks_t user_cbs = {
         .on_rx_done = twai_rx_cb,
@@ -66,7 +66,7 @@ void start_can_bus(const gpio_num_t tx, const gpio_num_t rx) {
     ESP_ERROR_CHECK(twai_node_enable(node_hdl));
 }
 
-void send_message(void) {
+void send_message(can_message_t * can_message) {
     uint8_t data[8];
     twai_frame_t tx_msg = {
         .header.id = 0x1,           // Message ID
@@ -78,10 +78,9 @@ void send_message(void) {
     ESP_ERROR_CHECK(twai_node_transmit(node_hdl, &tx_msg, 0)); 
 }
 
-int read_message(void) {
+void read_message(can_message_t * can_message) {
     uint64_t data = 0;
     xQueueReceive(queue_handler, &data, pdMS_TO_TICKS(1000));
-    return data;
 }
 
 static bool twai_rx_cb(twai_node_handle_t handle, const twai_rx_done_event_data_t *edata, void *user_ctx)
@@ -93,10 +92,15 @@ static bool twai_rx_cb(twai_node_handle_t handle, const twai_rx_done_event_data_
     };
     if (ESP_OK == twai_node_receive_from_isr(handle, &rx_frame)) {
         uint64_t data_response = 0;
-        for(int i=0; i<sizeof(recv_buff)/sizeof(uint8_t); i++) {
+
+        for(int i=0; i<rx_frame.header.dlc; i++)
             data_response |= recv_buff[i] << (i * 8);
-        }
-         xQueueSendFromISR(queue_handler, (void *)&data_response, pdFALSE);
+
+        can_message_t can_message;
+        can_message.canIde.ide = rx_frame.header.id;
+        can_message.data = data_response;
+
+        xQueueSendFromISR(queue_handler, &can_message, pdFALSE);
     }
     return false;
 }

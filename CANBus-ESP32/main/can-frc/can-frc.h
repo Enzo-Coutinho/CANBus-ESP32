@@ -12,13 +12,15 @@ enum CAN_MODES {
     DEFAULT
 };
 
-// 29_bits
- typedef struct {
-    uint8_t deviceType : 5;
-    uint8_t manufacturer : 8;
-    uint8_t apiClass : 6;
-    uint8_t apiIndex : 4;
-    uint8_t deviceNumber : 6;
+typedef union {
+    struct {
+        uint32_t deviceNumber : 6;
+        uint32_t apiIndex     : 4;
+        uint32_t apiClass     : 6;
+        uint32_t manufacturer : 8;
+        uint32_t deviceType   : 5;
+    };
+    uint32_t ide;
 } can_ide_t;
 
 typedef struct {
