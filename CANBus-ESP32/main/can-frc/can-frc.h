@@ -12,20 +12,17 @@ enum CAN_MODES {
     DEFAULT
 };
 
-typedef union {
-    struct {
-        uint32_t deviceNumber : 6;
-        uint32_t apiIndex     : 4;
-        uint32_t apiClass     : 6;
-        uint32_t manufacturer : 8;
-        uint32_t deviceType   : 5;
-    };
-    uint32_t ide;
+typedef struct {
+    uint8_t deviceNumber;
+    uint8_t apiIndex;
+    uint8_t apiClass;
+    uint8_t manufacturer;
+    uint8_t deviceType;
 } can_ide_t;
 
 typedef struct {
     can_ide_t canIde;
-    uint64_t data;
+    uint8_t data[8];
 } can_message_t;
 
 void set_can_mode(enum CAN_MODES mode);

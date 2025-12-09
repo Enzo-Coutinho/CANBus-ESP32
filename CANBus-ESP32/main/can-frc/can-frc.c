@@ -12,9 +12,23 @@ twai_onchip_node_config_t node_config;
 
 QueueHandle_t queue_handler;
 
+enum CAN_MODES mode_to_switch = DEFAULT;
+
 static bool twai_rx_cb(twai_node_handle_t handle, const twai_rx_done_event_data_t *edata, void *user_ctx);
 
-enum CAN_MODES mode_to_switch = DEFAULT;
+static inline uint32_t frc_can_encode_id(can_ide_t * can_id)
+{
+    uint32_t id = (uint32_t)(can_id->deviceType << 24) | (uint32_t)(can_id->manufacturer << 16) | (uint32_t)(can_id->apiClass << 10) | (uint16_t)(can_id->apiIndex << 6) | (uint8_t)(can_id->deviceNumber)
+}
+
+static inline void frc_can_decode_id(uint32_t id, can_ide_t * can_id)
+{
+    can_id->deviceNumber = (uint8_t)(id & 0x3F);
+    can_id->apiIndex = (uint8_t)((id >> 6) & 0xF);
+    can_id->apiClass = (uint8_t)((id >> 10) & 0x3F);
+    can_id->manufacturer = (uint8_t)((id >> 16) & 0xFF);
+    can_id->deviceType = (uint8_t)((id >> 24) & 0x1F);
+}
 
 void set_can_mode(enum CAN_MODES mode) {
     mode_to_switch = mode;
@@ -65,12 +79,11 @@ void start_can_bus(const gpio_num_t tx, const gpio_num_t rx) {
 }
 
 void send_message(can_message_t * can_message) {
-    uint8_t data[8];
     twai_frame_t tx_msg = {
-        .header.id = 0x1,           // Message ID
+        .header.id = frc_can_encode_id(&can_message->canIde),           // Message ID
         .header.ide = true,         // Use 29-bit extended ID format
-        .buffer = data,        // Pointer to data to transmit
-        .buffer_len = sizeof(data),  // Length of data to transmit
+        .buffer = can_message->data,        // Pointer to data to transmit
+        .buffer_len = sizeof(can_message->data),  // Length of data to transmit
     };
 
     ESP_ERROR_CHECK(twai_node_transmit(node_hdl, &tx_msg, 0)); 
@@ -88,16 +101,14 @@ static bool twai_rx_cb(twai_node_handle_t handle, const twai_rx_done_event_data_
         .buffer_len = sizeof(recv_buff),
     };
     if (ESP_OK == twai_node_receive_from_isr(handle, &rx_frame)) {
-        uint64_t data_response = 0;
+        can_message_t can_message;
 
         for(int i=0; i<rx_frame.header.dlc; i++)
-            data_response |= recv_buff[i] << (i * 8);
+            can_message.data[i] = recv_buff[i];
 
-        can_message_t can_message;
-        can_message.canIde.ide = rx_frame.header.id;
-        can_message.data = data_response;
+        frc_can_decode_id(rx_frame.header.id, &can_message.canIde);
 
-        xQueueSendFromISR(queue_handler, &can_message, pdFALSE);
+        xQueueSendFromISR(queue_handler, &can_message, NULL);
     }
     return false;
 }
