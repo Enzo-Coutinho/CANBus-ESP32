@@ -22,9 +22,11 @@ void set_can_mode(enum CAN_MODES mode) {
 
 void start_can_bus(const gpio_num_t tx, const gpio_num_t rx) {
 
+    memset(&node_config, 0, sizeof(node_config));
+
     const uint8_t queue_len = 10;
 
-    queue_handler = xQueueGenericCreate(queue_len, sizeof(can_message_t));
+    queue_handler = xQueueCreate(queue_len, sizeof(can_message_t));
 
     twai_event_callbacks_t user_cbs = {
         .on_rx_done = twai_rx_cb,
