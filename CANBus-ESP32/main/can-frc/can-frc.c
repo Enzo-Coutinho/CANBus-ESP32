@@ -29,8 +29,6 @@ void start_can_bus(const gpio_num_t tx, const gpio_num_t rx) {
     twai_event_callbacks_t user_cbs = {
         .on_rx_done = twai_rx_cb,
     };
-
-    ESP_ERROR_CHECK(twai_node_register_event_callbacks(node_hdl, &user_cbs, NULL));
     
     
     const uint32_t bitrate = 1e6;
@@ -59,10 +57,8 @@ void start_can_bus(const gpio_num_t tx, const gpio_num_t rx) {
             break;
     }
 
-    // Create a new TWAI controller driver instance
     ESP_ERROR_CHECK(twai_new_node_onchip(&node_config, &node_hdl));
-
-    // Start the TWAI controller
+    ESP_ERROR_CHECK(twai_node_register_event_callbacks(node_hdl, &user_cbs, NULL));
     ESP_ERROR_CHECK(twai_node_enable(node_hdl));
 }
 
