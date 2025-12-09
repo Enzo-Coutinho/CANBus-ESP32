@@ -75,8 +75,7 @@ void send_message(can_message_t * can_message) {
 }
 
 void read_message(can_message_t * can_message) {
-    uint64_t data = 0;
-    xQueueReceive(queue_handler, &data, pdMS_TO_TICKS(1000));
+    xQueueReceive(queue_handler, can_message, pdMS_TO_TICKS(1000));
 }
 
 static bool twai_rx_cb(twai_node_handle_t handle, const twai_rx_done_event_data_t *edata, void *user_ctx)
