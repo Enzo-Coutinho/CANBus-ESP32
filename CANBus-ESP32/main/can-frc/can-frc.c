@@ -17,14 +17,15 @@ enum CAN_MODES mode_to_switch = DEFAULT;
 
 static bool twai_rx_cb(twai_node_handle_t handle, const twai_rx_done_event_data_t *edata, void *user_ctx);
 
-static inline uint32_t frc_can_encode_id(can_ide_t * can_id)
+static inline uint32_t frc_can_encode_id(const can_ide_t *can_id)
 {
-    return  (((uint32_t)(can_id->deviceType << 24)) & 0xF8000000) | 
-            (((uint32_t)(can_id->manufacturer << 16)) & 0xFF0000) | 
-            (((uint32_t)(can_id->apiClass << 10)) & 0xFC00)       | 
-            (((uint16_t)(can_id->apiIndex << 6)) & 0x3C0)         | 
-            ((uint8_t)(can_id->deviceNumber) & 0x3F);
+    return (((uint32_t)(can_id->deviceType   & 0x1F) << 24) |
+            ((uint32_t)(can_id->manufacturer & 0xFF) << 16) |
+            ((uint32_t)(can_id->apiClass     & 0x3F) << 10) |
+            ((uint32_t)(can_id->apiIndex     & 0x0F) <<  6) |
+            ((uint32_t)(can_id->deviceNumber & 0x3F)));
 }
+
 
 static inline void frc_can_decode_id(uint32_t id, can_ide_t * can_id)
 {
@@ -83,20 +84,12 @@ void start_can_bus(const gpio_num_t tx, const gpio_num_t rx) {
     ESP_ERROR_CHECK(twai_node_enable(node_hdl));
 }
 
-void send_message(can_message_t * can_message) {
-    twai_frame_t tx_msg = {
-        .header.id = frc_can_encode_id(&can_message->canIde),           // Message ID
-        .header.ide = true,         // Use 29-bit extended ID format
-        .buffer = can_message->data,        // Pointer to data to transmit
-        .buffer_len = sizeof(can_message->data),  // Length of data to transmit
-    };
-
-    ESP_ERROR_CHECK(twai_node_transmit(node_hdl, &tx_msg, 0)); 
+bool read_message(can_message_t *can_message) {
+    if (queue_handler == NULL)
+        return false;
+    return xQueueReceive(queue_handler, can_message, pdMS_TO_TICKS(100)) == pdTRUE;
 }
 
-void read_message(can_message_t * can_message) {
-    xQueueReceive(queue_handler, can_message, pdMS_TO_TICKS(1000));
-}
 
 static bool twai_rx_cb(twai_node_handle_t handle, const twai_rx_done_event_data_t *edata, void *user_ctx)
 {
