@@ -1,7 +1,0 @@
-{
-  "C_Cpp.intelliSenseEngine": "default",
-  "files.associations": {
-    "*.html": "jinja-html",
-    "can-frc.h": "c"
-  }
-}
