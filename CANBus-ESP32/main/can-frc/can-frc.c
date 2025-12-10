@@ -19,7 +19,11 @@ static bool twai_rx_cb(twai_node_handle_t handle, const twai_rx_done_event_data_
 
 static inline uint32_t frc_can_encode_id(can_ide_t * can_id)
 {
-    return (uint32_t)(can_id->deviceType << 24) | (uint32_t)(can_id->manufacturer << 16) | (uint32_t)(can_id->apiClass << 10) | (uint16_t)(can_id->apiIndex << 6) | (uint8_t)(can_id->deviceNumber);
+    return  (((uint32_t)(can_id->deviceType << 24)) & 0xF8000000) | 
+            (((uint32_t)(can_id->manufacturer << 16)) & 0xFF0000) | 
+            (((uint32_t)(can_id->apiClass << 10)) & 0xFC00)       | 
+            (((uint16_t)(can_id->apiIndex << 6)) & 0x3C0)         | 
+            ((uint8_t)(can_id->deviceNumber) & 0x3F);
 }
 
 static inline void frc_can_decode_id(uint32_t id, can_ide_t * can_id)
