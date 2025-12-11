@@ -4,6 +4,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <driver/gpio.h>
+#include "esp_log.h"
 #include "can-patterns.h"
 
 typedef struct {

@@ -3,4 +3,9 @@
 
 #define BITRATE 1000000U
 #define LENGHT 8
+
+enum MANUFACTURER {
+    EMPTY,
+};
+
 #endif
