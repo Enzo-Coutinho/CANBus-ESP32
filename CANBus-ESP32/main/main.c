@@ -24,5 +24,11 @@ void app_main(void)
         ESP_LOGI(MAIN, "API Class: %d", can_receive.can_ide.api_class);
         ESP_LOGI(MAIN, "API Index: %d", can_receive.can_ide.api_index);
         ESP_LOGI(MAIN, "Device Number: %d", can_receive.can_ide.device_number);
+        ESP_LOGI(MAIN, "Data lenght: %d", can_receive.dlc);
+        ESP_LOGI(MAIN, "Is Error: %d", can_receive.is_error);
+        ESP_LOGI(MAIN, "Is CAN FD: %d", can_receive.is_fd_format);
+        uint64_t data = 0;
+        for(uint8_t i = 0; i<can_receive.dlc; i++)
+            data |= can_receive.data[i];
     }
 }
