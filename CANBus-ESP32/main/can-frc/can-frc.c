@@ -70,6 +70,7 @@ esp_err_t read_message(can_message_t *can_message) {
         return ESP_FAIL;
     if(xQueueReceive(queue_handler, can_message, pdMS_TO_TICKS(100)))
         return ESP_OK;
+    return ESP_FAIL;
 }
 
 
