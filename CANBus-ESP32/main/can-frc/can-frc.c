@@ -14,25 +14,6 @@ QueueHandle_t queue_handler;
 
 static bool twai_rx_cb(twai_node_handle_t handle, const twai_rx_done_event_data_t *edata, void *user_ctx);
 
-static inline uint32_t frc_can_encode_id(const can_ide_t *can_id)
-{
-    return (((uint32_t)(can_id->device_type   & 0x1F) << 24) |
-            ((uint32_t)(can_id->manufacturer & 0xFF) << 16) |
-            ((uint32_t)(can_id->api_class     & 0x3F) << 10) |
-            ((uint32_t)(can_id->api_index     & 0x0F) <<  6) |
-            ((uint32_t)(can_id->device_number & 0x3F)));
-}
-
-
-static inline void frc_can_decode_id(uint32_t id, can_ide_t * can_id)
-{
-    can_id->device_number = (uint8_t)(id & 0x3F);
-    can_id->api_index = (uint8_t)((id >> 6) & 0xF);
-    can_id->api_class = (uint8_t)((id >> 10) & 0x3F);
-    can_id->manufacturer = (uint8_t)((id >> 16) & 0xFF);
-    can_id->device_type = (uint8_t)((id >> 24) & 0x1F);
-}
-
 esp_err_t start_can_bus(const gpio_num_t tx, const gpio_num_t rx) {  
 
     memset(&node_config, 0, sizeof(node_config));
@@ -85,13 +66,20 @@ static bool twai_rx_cb(twai_node_handle_t handle, const twai_rx_done_event_data_
         
         can_message_t can_message = {0};
 
-        frc_can_decode_id(rx_frame.header.id, &can_message.can_ide);
+        can_message.ide = rx_frame.header.id;
         can_message.dlc = rx_frame.header.dlc;
-        can_message.data = recv_buff;
-        can_message.is_remote_frame = rx_frame.header.rtr;
-        can_message.is_fd_format = rx_frame.header.fdf;
-        can_message.is_error = rx_frame.header.esi;
-        can_message.is_bit_rate_shift = rx_frame.header.brs;
+
+        can_message.flags |= (rx_frame.header.rtr & 0x01);
+        can_message.flags |= ((rx_frame.header.fdf << 1) & 0x02);
+        can_message.flags |= ((rx_frame.header.esi << 2) & 0x04);
+        can_message.flags |= ((rx_frame.header.brs << 3) & 0x08);
+
+        can_message.timestamp = rx_frame.header.timestamp;
+
+        can_message.data = 0;
+
+        for(int i=0; i<LENGHT; i++)
+            can_message.data |= recv_buff[i];
 
         xQueueSendFromISR(queue_handler, &can_message, NULL);
     }
