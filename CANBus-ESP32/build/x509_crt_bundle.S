@@ -1,4 +1,4 @@
-/* * Data converted from C:/GIthub/CANBus-ESP32/CANBus-ESP32/build/esp-idf/mbedtls/x509_crt_bundle
+/* * Data converted from C:/Github/CANBus-ESP32/CANBus-ESP32/build/esp-idf/mbedtls/x509_crt_bundle
  */
 .data
 #if !defined (__APPLE__) && !defined (__linux__)

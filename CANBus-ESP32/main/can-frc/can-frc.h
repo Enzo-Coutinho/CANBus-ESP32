@@ -9,8 +9,7 @@
 
 typedef struct {
     uint32_t ide;
-    uint8_t flags;
-    uint8_t dlc;
+    uint8_t flags_with_DLC;
     uint64_t data;
     uint64_t timestamp;
 } can_message_t;

@@ -20,9 +20,5 @@ void app_main(void)
 
     for(;;) {
         read_message(&can_receive);
-
-        uint32_t serial_message = can_receive.timestamp | can_receive.flags | can_receive.ide | can_receive.dlc | can_receive.data;
-
-        ESP_LOGI(MAIN, "%d", serial_message);
     }
 }

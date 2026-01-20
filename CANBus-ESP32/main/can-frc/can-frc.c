@@ -78,7 +78,7 @@ static bool twai_rx_cb(twai_node_handle_t handle, const twai_rx_done_event_data_
 
         can_message.data = 0;
 
-        for(int i=0; i<LENGHT; i++)
+        for(int i=0; i<can_message.dlc; i++)
             can_message.data |= recv_buff[i];
 
         xQueueSendFromISR(queue_handler, &can_message, NULL);
