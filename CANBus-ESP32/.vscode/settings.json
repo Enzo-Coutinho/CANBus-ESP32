@@ -1,7 +1,7 @@
 {
   "C_Cpp.intelliSenseEngine": "default",
   "idf.flashType": "UART",
-  "idf.portWin": "COM3",
+  "idf.portWin": "COM6",
   "files.associations": {
     "*.html": "jinja-html",
     "can-frc.h": "c",
