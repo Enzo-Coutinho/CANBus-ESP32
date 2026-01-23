@@ -6,7 +6,7 @@
 #include <driver/gpio.h>
 #include "esp_log.h"
 
-#define CAN_STRUCT_LENGHT_BYTES 12
+#define CAN_STRUCT_LENGHT_BYTES 15
 
 typedef struct {
     uint32_t ide;
