@@ -1,34 +1,56 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "driver/uart.h"
 #include "can-frc/can-frc.h"
 
 #define TX GPIO_NUM_14
 #define RX GPIO_NUM_13
 
-static const char * MAIN = "MAIN";
+#define SIMULATING_CAN_PACKET 0
+
+#define ESP_LOG_COLOR_DISABLED     (1)  
+#define ESP_LOG_TIMESTAMP_DISABLED (1) 
+#define ESP_LOG_FORMATTING_DISABLED (1)
+
+static inline void format_can_message_to_send_over_serial(can_message_t * can_message, uint8_t * buffer) {
+    buffer[0] = 0x0A;
+    buffer[1] = (uint8_t)((can_message->ide >> 24) & 0xFF);
+    buffer[2] = (uint8_t)((can_message->ide >> 16) & 0xFF);
+    buffer[3] = (uint8_t)((can_message->ide >> 8) & 0xFF);
+    buffer[4] = (uint8_t)((can_message->ide & 0xFF));
+    buffer[5] = can_message->flags_with_DLC;
+    buffer[6] = (uint8_t)((can_message->data >> 56) & 0xFF);
+    buffer[7] = (uint8_t)((can_message->data >> 48) & 0xFF);
+    buffer[8] = (uint8_t)((can_message->data >> 40) & 0xFF);
+    buffer[9] = (uint8_t)((can_message->data >> 32) & 0xFF);
+    buffer[10] = (uint8_t)((can_message->data >> 24) & 0xFF);
+    buffer[11] = (uint8_t)((can_message->data >> 16) & 0xFF);
+    buffer[12] = (uint8_t)((can_message->data >> 8) & 0xFF);
+    buffer[13] = (uint8_t)(can_message->data & 0xFF);
+    buffer[14] = 0x0A;
+}
 
 void app_main(void)
 {
-    start_can_bus(TX, RX);
+    ESP_ERROR_CHECK(start_can_bus(TX, RX));
 
     can_message_t can_receive = {0};
 
     for(;;) {
-        read_message(&can_receive);
-        const uint8_t manufacturer = can_receive.can_ide.manufacturer;
-        const uint8_t deviceType = can_receive.can_ide.device_type;
-        const uint8_t apiClass = can_receive.can_ide.api_class;
-        const uint8_t apiIndex = can_receive.can_ide.api_index;
-        ESP_LOGI(MAIN, "Manufacturer: %s", can_receive.can_ide.manufacturer);
-        ESP_LOGI(MAIN, "Device Type: %s", can_receive.can_ide.device_type); 
-        ESP_LOGI(MAIN, "API Class: %d", can_receive.can_ide.api_class);
-        ESP_LOGI(MAIN, "API Index: %d", can_receive.can_ide.api_index);
-        ESP_LOGI(MAIN, "Device Number: %d", can_receive.can_ide.device_number);
-        ESP_LOGI(MAIN, "Data lenght: %d", can_receive.dlc);
-        ESP_LOGI(MAIN, "Is Error: %d", can_receive.is_error);
-        ESP_LOGI(MAIN, "Is CAN FD: %d", can_receive.is_fd_format);
-        uint64_t data = 0;
-        for(uint8_t i = 0; i<can_receive.dlc; i++)
-            data |= can_receive.data[i];
+        #ifdef SIMULATING_CAN_PACKET
+            can_receive.ide = 0x01011840;
+            can_receive.flags_with_DLC = 0xFF;
+            can_receive.data = 0xFFFFFFFFFFFFFFFF;
+        #else
+            read_message(&can_receive);
+        #endif
+
+        uint8_t serial_message[CAN_STRUCT_LENGHT_BYTES] = {0};
+        format_can_message_to_send_over_serial(&can_receive, serial_message);
+
+        for(int i=0; i<CAN_STRUCT_LENGHT_BYTES; i++)
+            printf("%02X", serial_message[i]);
+        printf("\n");
+        vTaskDelay(pdMS_TO_TICKS(20));
     }
 }
