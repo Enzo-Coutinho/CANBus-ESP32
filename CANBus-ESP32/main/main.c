@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "driver/uart.h"
 #include "can-frc/can-frc.h"
 
 #define TX GPIO_NUM_14
