@@ -1,6 +1,6 @@
 /* Automatically generated file; DO NOT EDIT */
 /* Espressif IoT Development Framework Linker Script */
-/* Generated from: C:\GIthub\CANBus-ESP32\CANBus-ESP32\build\esp-idf\esp_system\ld\sections.ld.in */
+/* Generated from: C:\Github\CANBus-ESP32\CANBus-ESP32\build\esp-idf\esp_system\ld\sections.ld.in */
 
 /*
 

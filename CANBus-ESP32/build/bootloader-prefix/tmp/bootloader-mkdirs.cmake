@@ -6,22 +6,22 @@ cmake_minimum_required(VERSION 3.5)
 # If CMAKE_DISABLE_SOURCE_CHANGES is set to true and the source directory is an
 # existing directory in our source tree, calling file(MAKE_DIRECTORY) on it
 # would cause a fatal error, even though it would be a no-op.
-if(NOT EXISTS "C:/Users/enzoc/esp/v5.5.1/esp-idf/components/bootloader/subproject")
-  file(MAKE_DIRECTORY "C:/Users/enzoc/esp/v5.5.1/esp-idf/components/bootloader/subproject")
+if(NOT EXISTS "C:/Users/enzo/esp/v5.5.1/esp-idf/components/bootloader/subproject")
+  file(MAKE_DIRECTORY "C:/Users/enzo/esp/v5.5.1/esp-idf/components/bootloader/subproject")
 endif()
 file(MAKE_DIRECTORY
-  "C:/GIthub/CANBus-ESP32/CANBus-ESP32/build/bootloader"
-  "C:/GIthub/CANBus-ESP32/CANBus-ESP32/build/bootloader-prefix"
-  "C:/GIthub/CANBus-ESP32/CANBus-ESP32/build/bootloader-prefix/tmp"
-  "C:/GIthub/CANBus-ESP32/CANBus-ESP32/build/bootloader-prefix/src/bootloader-stamp"
-  "C:/GIthub/CANBus-ESP32/CANBus-ESP32/build/bootloader-prefix/src"
-  "C:/GIthub/CANBus-ESP32/CANBus-ESP32/build/bootloader-prefix/src/bootloader-stamp"
+  "C:/Github/CANBus-ESP32/CANBus-ESP32/build/bootloader"
+  "C:/Github/CANBus-ESP32/CANBus-ESP32/build/bootloader-prefix"
+  "C:/Github/CANBus-ESP32/CANBus-ESP32/build/bootloader-prefix/tmp"
+  "C:/Github/CANBus-ESP32/CANBus-ESP32/build/bootloader-prefix/src/bootloader-stamp"
+  "C:/Github/CANBus-ESP32/CANBus-ESP32/build/bootloader-prefix/src"
+  "C:/Github/CANBus-ESP32/CANBus-ESP32/build/bootloader-prefix/src/bootloader-stamp"
 )
 
 set(configSubDirs )
 foreach(subDir IN LISTS configSubDirs)
-    file(MAKE_DIRECTORY "C:/GIthub/CANBus-ESP32/CANBus-ESP32/build/bootloader-prefix/src/bootloader-stamp/${subDir}")
+    file(MAKE_DIRECTORY "C:/Github/CANBus-ESP32/CANBus-ESP32/build/bootloader-prefix/src/bootloader-stamp/${subDir}")
 endforeach()
 if(cfgdir)
-  file(MAKE_DIRECTORY "C:/GIthub/CANBus-ESP32/CANBus-ESP32/build/bootloader-prefix/src/bootloader-stamp${cfgdir}") # cfgdir has leading slash
+  file(MAKE_DIRECTORY "C:/Github/CANBus-ESP32/CANBus-ESP32/build/bootloader-prefix/src/bootloader-stamp${cfgdir}") # cfgdir has leading slash
 endif()

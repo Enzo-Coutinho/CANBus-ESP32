@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <freertos/FreeRTOS.h>
 #include "can-frc/can-frc.h"
 
 #define TX GPIO_NUM_14
@@ -36,7 +37,7 @@ void app_main(void)
     can_message_t can_receive = {0};
 
     for(;;) {
-        #ifdef SIMULATING_CAN_PACKET
+        #if SIMULATING_CAN_PACKET
             can_receive.ide = 0x01011840;
             can_receive.flags_with_DLC = 0xFF;
             can_receive.data = 0xFFFFFFFFFFFFFFFF;
