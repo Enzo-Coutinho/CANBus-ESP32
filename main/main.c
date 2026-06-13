@@ -1,15 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "test.h"
+#include "freertos/FreeRTOS.h"
+#include "can-frc.h"
 
 #define TX GPIO_NUM_14
 #define RX GPIO_NUM_13
 
 #define SIMULATING_CAN_PACKET 0
-
-#define ESP_LOG_COLOR_DISABLED     (1)  
-#define ESP_LOG_TIMESTAMP_DISABLED (1) 
-#define ESP_LOG_FORMATTING_DISABLED (1)
 
 static inline void format_can_message_to_send_over_serial(can_message_t * can_message, uint8_t * buffer) {
     buffer[0] = 0x0A;
