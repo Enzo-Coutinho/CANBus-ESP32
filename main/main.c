@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "freertos/FreeRTOS.h"
-#include "can-frc.h"
+#include "can.h"
 
 #define TX GPIO_NUM_14
 #define RX GPIO_NUM_13
@@ -10,10 +10,10 @@
 
 static inline void format_can_message_to_send_over_serial(can_message_t * can_message, uint8_t * buffer) {
     buffer[0] = 0x0A;
-    buffer[1] = (uint8_t)((can_message->ide >> 24) & 0xFF);
-    buffer[2] = (uint8_t)((can_message->ide >> 16) & 0xFF);
-    buffer[3] = (uint8_t)((can_message->ide >> 8) & 0xFF);
-    buffer[4] = (uint8_t)((can_message->ide & 0xFF));
+    buffer[1] = (uint8_t)((can_message->id >> 24) & 0xFF);
+    buffer[2] = (uint8_t)((can_message->id >> 16) & 0xFF);
+    buffer[3] = (uint8_t)((can_message->id >> 8) & 0xFF);
+    buffer[4] = (uint8_t)((can_message->id & 0xFF));
     buffer[5] = can_message->flags_with_DLC;
     buffer[6] = (uint8_t)((can_message->data >> 56) & 0xFF);
     buffer[7] = (uint8_t)((can_message->data >> 48) & 0xFF);
@@ -41,7 +41,7 @@ void app_main(void)
             read_message(&can_receive);
         #endif
 
-        uint8_t serial_message[CAN_STRUCT_LENGHT_BYTES] = {0};
+        uint8_t serial_message[15] = {0};
         format_can_message_to_send_over_serial(&can_receive, serial_message);
 
         for(int i=0; i<CAN_STRUCT_LENGHT_BYTES; i++)

@@ -6,15 +6,20 @@
 #include <driver/gpio.h>
 #include "esp_log.h"
 
-#define CAN_STRUCT_LENGHT_BYTES 15
+typedef enum {
+    DEFAULT,
+    LISTEN_ONLY,
+    LOOPBACK,
+    SELF_TEST
+} can_modes_t;
 
 typedef struct {
-    uint32_t ide;
+    uint32_t id;
     uint8_t flags_with_DLC;
     uint64_t data;
 } can_message_t;
 
-esp_err_t start_can_bus(const gpio_num_t tx, const gpio_num_t rx);
+esp_err_t start_can_bus(const gpio_num_t tx, const gpio_num_t rx, can_modes_t mode);
 
 esp_err_t read_message(can_message_t * can_message);
 
