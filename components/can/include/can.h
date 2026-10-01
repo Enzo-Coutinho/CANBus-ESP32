@@ -15,12 +15,12 @@ typedef enum {
 
 typedef struct {
     uint32_t id;
-    uint8_t flags_with_DLC;
+    uint8_t flags;
     uint64_t data;
 } can_message_t;
 
 esp_err_t start_can_bus(const gpio_num_t tx, const gpio_num_t rx, can_modes_t mode);
-
 esp_err_t read_message(can_message_t * can_message);
+esp_err_t write_message(can_message_t * can_message);
 
 #endif

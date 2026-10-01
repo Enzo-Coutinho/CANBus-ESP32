@@ -1,6 +1,6 @@
 #include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
 #include "freertos/queue.h"
+#include "freertos/task.h"
 #include "esp_err.h"
 #include "esp_twai.h"
 #include "esp_twai_onchip.h"
@@ -18,10 +18,10 @@ static twai_onchip_node_config_t node_config;
 
 static QueueHandle_t received_messages;
 
-static bool receive_message_finish_callback(twai_node_handle_t handle, const twai_rx_done_event_data_t *edata, void *user_ctx);
-static bool send_message_finish_callback(twai_node_handle_t handle, const twai_tx_done_event_data_t *edata, void *user_ctx);
-
+static BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 static can_modes_t can_mode;
+
+static bool receive_message_finish_callback(twai_node_handle_t handle, const twai_rx_done_event_data_t *edata, void *user_ctx);
 
 esp_err_t start_can_bus(const gpio_num_t tx, const gpio_num_t rx, can_modes_t mode) {  
 
@@ -36,7 +36,6 @@ esp_err_t start_can_bus(const gpio_num_t tx, const gpio_num_t rx, can_modes_t mo
 
     twai_event_callbacks_t user_cbs = {
         .on_rx_done = receive_message_finish_callback,
-        .on_tx_done = send_message_finish_callback
     };
 
     node_config.io_cfg.tx = tx;
@@ -65,15 +64,15 @@ esp_err_t start_can_bus(const gpio_num_t tx, const gpio_num_t rx, can_modes_t mo
 }
 
 static uint8_t get_dlc(can_message_t * can_message) {
-    return (can_message->flags_with_DLC >> 4) & 0x0F;
+    return (can_message->flags >> 4) & 0x0F;
 }
 
 static bool is_remote_frame(can_message_t * can_message) {
-    return (bool)(can_message->flags_with_DLC & 0x01);
+    return (bool)(can_message->flags & 0x01);
 }
 
-static bool is_FD(can_message_t * can_message) {
-    return (can_message->flags_with_DLC & 0x02) >> 1;
+static bool is_fd(can_message_t * can_message) {
+    return (can_message->flags & 0x02) >> 1;
 }
 
 esp_err_t read_message(can_message_t *can_message) {
@@ -100,10 +99,10 @@ esp_err_t write_message(can_message_t * can_message) {
         send_buff[i] = (uint8_t)((can_message->data >> 8 * i) & 0xFF);
 
     twai_frame_t message = {
-        .header.id = can_message->id,           // Message ID
-        .header.ide = EXTENDED_IDE,         // Use 29-bit extended ID format
-        .buffer = send_buff,        // Pointer to data to transmit
-        .buffer_len = dlc,  // Length of data to transmit
+        .header.id = can_message->id,
+        .header.ide = EXTENDED_IDE,
+        .buffer = send_buff,
+        .buffer_len = dlc,
     };
 
     return twai_node_transmit(node_hdl, &message, 500);
@@ -125,11 +124,11 @@ static bool receive_message_finish_callback(twai_node_handle_t handle, const twa
 
         can_message.id = rx_frame.header.id;
 
-        can_message.flags_with_DLC |= (rx_frame.header.rtr & 0x01);
-        can_message.flags_with_DLC |= ((rx_frame.header.fdf << 1) & 0x02);
-        can_message.flags_with_DLC |= ((rx_frame.header.esi << 2) & 0x04);
-        can_message.flags_with_DLC |= ((rx_frame.header.brs << 3) & 0x08);
-        can_message.flags_with_DLC |= ((rx_frame.header.dlc & 0x0F) << 4);
+        can_message.flags |= (rx_frame.header.rtr & 0x01);
+        can_message.flags |= ((rx_frame.header.fdf << 1) & 0x02);
+        can_message.flags |= ((rx_frame.header.esi << 2) & 0x04);
+        can_message.flags |= ((rx_frame.header.brs << 3) & 0x08);
+        can_message.flags |= ((rx_frame.header.dlc & 0x0F) << 4);
 
         can_message.data = 0;
 
@@ -140,11 +139,5 @@ static bool receive_message_finish_callback(twai_node_handle_t handle, const twa
             // overflow (opcional: contador de erro)
         }
     }
-    return false;
-}
-
-static bool send_message_finish_callback(twai_node_handle_t handle, const twai_tx_done_event_data_t *edata, void *user_ctx)
-{
-    printf("Frame sends.");
     return false;
 }
