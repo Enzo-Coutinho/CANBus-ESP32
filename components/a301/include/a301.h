@@ -2,9 +2,11 @@
 #define A301_H
 
 void setThrottle(float power);
-
+int getTemperature(void);
 float getAbsolutePosition(void);
 
-int getTemperature(void);
+double getRPM(void);
+double getCurrent();
+
 
 #endif

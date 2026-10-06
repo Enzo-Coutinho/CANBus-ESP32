@@ -89,20 +89,15 @@ esp_err_t write_message(can_message_t * can_message) {
         return ESP_FAIL;
 
     uint8_t send_buff[8] = {0};
-
-    uint8_t dlc = get_dlc(can_message);
-
-    if(dlc > 8)
-        return ESP_FAIL;
-
-    for(uint8_t i=0; i<dlc; i++)
-        send_buff[i] = (uint8_t)((can_message->data >> 8 * i) & 0xFF);
+    const size_t lenght_buff = sizeof(send_buff);
+    
+    memcpy(&can_message->data, &send_buff, lenght_buff);
 
     twai_frame_t message = {
         .header.id = can_message->id,
         .header.ide = EXTENDED_IDE,
         .buffer = send_buff,
-        .buffer_len = dlc,
+        .buffer_len = sizeof(send_buff),
     };
 
     return twai_node_transmit(node_hdl, &message, 500);
